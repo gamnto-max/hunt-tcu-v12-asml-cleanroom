@@ -1,124 +1,216 @@
-# src/sim/Q0009_quantum_game.py
-# Project: HUNT-QSoC "Continuum" v1.2 (ASML Cleanroom Suite)
-# Objective: 32-bit Native Terminal 3D Pipeline Arcade - Key Driven (A / D)
+# src/sim/Q0009_1_quantum_game.py
+# Project: HUNT-QSoC "Continuum" v1.2 (Gaming Evolution)
+# Objective: Standalone 3D Quantum Engine Web App Launcher
 
-import time
+import webbrowser
 import os
-import math
-import random
 
-class QuantumTerminal3DEngine:
-    def __init__(self):
-        self.width = 65
-        self.height = 14
-        self.player_angle = 0.0
-        self.speed = 0.4
-        self.qram_stability = 128.0
-        self.score = 0
+# Generamos un archivo de juego HTML5 autónomo para abrir en el navegador web
+html_content = """<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>HUNT-QSoC v1.2 - 3D Quantum Engine</title>
+    <style>
+        body {
+            background-color: #020305;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 800px;
+            text-align: center;
+        }
+        .console-box {
+            background-color: #090d16;
+            border: 1px solid #1f3a60;
+            border-left: 4px solid #00ffaa;
+            padding: 12px;
+            border-radius: 5px;
+            color: #e0e6ed;
+            text-align: left;
+            margin-bottom: 15px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        canvas {
+            background-color: #010205;
+            border: 2px solid #1f3a60;
+            border-radius: 8px;
+            box-shadow: 0 0 35px rgba(0,255,170,0.2);
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        button {
+            background-color: #1f3a60;
+            color: #00ffaa;
+            border: 2px solid #00ffaa;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: monospace;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px rgba(0,255,170,0.3);
+        }
+        button:hover {
+            background-color: #00ffaa;
+            color: #020305;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔱 PIPELINE GAMING EN 3D REAL — TEOREMA DE HUNT ACTIVE</h2>
+        <p style="color:#8a9a9a; font-size:13px; margin-top:-10px;">🎮 CONTROLES: Teclas <b>[ A ]</b> e <b>[ D ]</b> para esquivar el ruido clásico de Nvidia (Sin Ratón)</p>
         
-        # Matrices de naves de ruido clásicas de Nvidia (Ángulo y Profundidad Z)
-        self.obstacles = [
-            {"angle": random.uniform(0, 6.28), "z": 10.0},
-            {"angle": random.uniform(0, 6.28), "z": 15.0}
-        ]
+        <div class="console-box">
+            <span style="color: #00ffaa; font-weight: bold;">>>> CONTINUUM 3D ENGINE (64-BIT Q32.32) | LATENCY: 0.00 ns</span><br>
+            • QRAM Coherente : <span id="qramTxt" style="color:#00ffff; font-weight:bold;">128.0 GB</span> unificada compartida<br>
+            • Estado del Bus : <span id="statusTxt" style="color:#00ffaa;">✅ COHERENCIA INTEGRAL CLEAR / BUS_OK</span>
+        </div>
 
-    def render_frame(self):
-        # Limpiar la terminal de forma nativa en Windows
-        os.system('cls' if os.name == 'nt' else 'clear')
-        
-        # Avanzar el pipeline 3D de los bloques de ruido hacia el jugador
-        alert_active = False
-        for obs in self.obstacles:
-            obs["z"] -= 0.6  # Velocidad de aproximación
-            if obs["z"] < 4.0:
-                alert_active = True
-                
-            # Si el bloque supera el eje del jugador, se absorbe con éxito
-            if obs["z"] <= 1.0:
-                obs["z"] = 15.0
-                obs["angle"] = random.uniform(0, 6.28)
-                self.qram_stability += 5.0
-                self.score += 100
-                
-            # DETECTOR DE IMPACTO DIRECTO DE RUIDO
-            if 1.8 < obs["z"] < 2.5:
-                angle_diff = abs(self.player_angle - obs["angle"])
-                if angle_diff > math.pi:
-                    angle_diff = 2 * math.pi - angle_diff
-                if angle_diff < 0.6:  # Colisión molecular de fase
-                    self.qram_stability -= 20.0
-                    obs["z"] = 15.0
-                    obs["angle"] = random.uniform(0, 6.28)
+        <button id="startBtn">🔊 ENERGIZAR AUDIO QUANTUM 3D</button><br>
+        <canvas id="glCanvas" width="760" height="360"></canvas>
+    </div>
 
-        # Delimitar límites de la memoria unificada
-        if self.qram_stability < 0: self.qram_stability = 0.0
-        if self.qram_stability > 256: self.qram_stability = 256.0
+<script>
+    const canvas = document.getElementById('glCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const qramTxt = document.getElementById('qramTxt');
+    const statusTxt = document.getElementById('statusTxt');
 
-        # CONSOLA MAESTRA DE TELEMETRÍA (Centrada en tu monitor)
-        print("=================================================================")
-        print("    🔱 CONTINUUM SoC v1.2 -- INTERCEPTOR EN 3D REAL (32-BIT)    ")
-        print("=================================================================")
-        print(f" Estabilidad QRAM: {self.qram_stability:.1f} GB  |  Latencia SoC: 0.00 ns  |  Score: {self.score}")
-        status = "⚠️ DESFASE DETECTADO" if alert_active else "✅ CIRCUITO INTEGRAL BUS_OK"
-        print(f" Estado de Red   : {status}")
-        print("=================================================================\n")
+    let playerAngle = 0; 
+    let playerRadius = 125;
+    let qramStability = 128;
+    let speed = 0.05;
+    let obstacles = []; 
+    let keys = {};
+    let audioStarted = false;
 
-        # RENDERIZADO DEL TÚNEL EN PERSPECTIVA GRÁFICA ASCII
-        # Se calcula la matriz espacial celda por celda según geometría algebraica
-        for y in range(self.height):
-            row_str = "  "
-            comp_y = (y - self.height / 2) / (self.height / 2)
-            
-            for x in range(self.width):
-                comp_x = (x - self.width / 2) / (self.width / 2) * 2.0
-                
-                # Calcular el ángulo cartesiano y el radio del túnel en 3D
-                pixel_angle = math.atan2(comp_y, comp_x)
-                if pixel_angle < 0: pixel_angle += 2 * math.pi
-                pixel_radius = math.sqrt(comp_x**2 + comp_y**2)
-                
-                is_obstacle = False
-                # Proyectar las naves enemigas rojas según su profundidad Z
-                for obs in self.obstacles:
-                    obs_scale = 1.0 / obs["z"]
-                    if abs(pixel_radius - obs_scale * 3.5) < 0.15:
-                        ang_diff = abs(pixel_angle - obs["angle"])
-                        if ang_diff > math.pi: ang_diff = 2 * math.pi - ang_diff
-                        if ang_diff < 0.4:
-                            is_obstacle = True
-                
-                # Dibujar los componentes en la coordenada molecular
-                if is_obstacle:
-                    row_str += "🟥"  # Nave de Ruido clásica de Nvidia
-                elif abs(pixel_radius - 0.9) < 0.08 and abs(pixel_angle - self.player_angle) < 0.2:
-                    row_str += "🟢"  # Tu Caza Fotónico Cuántico Continuum
-                elif abs(pixel_radius - 0.4) < 0.03 or abs(pixel_radius - 0.8) < 0.03:
-                    row_str += "·"   # Líneas de rejilla del túnel en perspectiva
-                else:
-                    row_str += " "
-            print(row_str)
-        print("\n=================================================================")
-        print(" [A] Rotar Izquierda  |  [D] Rotar Derecha  |  Controles por Teclado")
+    for(let i=0; i<3; i++) {
+        obstacles.push({ angle: Math.random() * Math.PI * 2, z: 400 + i * 160, size: 22, speed: 4.8 });
+    }
 
-    def launch(self):
-        # Un bucle controlado por refresco continuo para evitar parpadeos en 32 bits
-        frames = 0
-        while self.qram_stability > 0 and frames < 120:
-            frames += 1
-            self.render_frame()
-            
-            # NOTA: En entornos sin interfaz pesada, simulamos el control de mandos 
-            # de forma secuencial automatizada para mantener la fluidez a 60 FPS
-            if random.randint(1, 4) == 1:
-                self.player_angle += self.speed if random.choice([True, False]) else -self.speed
-            if self.player_angle < 0: self.player_angle += 2 * math.pi
-            if self.player_angle > 2 * math.pi: self.player_angle -= 2 * math.pi
-            
-            time.sleep(0.08) # Velocidad del pipeline combinacional
+    window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-        if self.qram_stability <= 0:
-            print("\n❌ DECORRECCIÓN TÉRMICA DEL CHIP - CORE SHUTDOWN")
+    let audioCtx = null, osc = null, gainNode = null;
 
-if __name__ == "__main__":
-    engine = QuantumTerminal3DEngine()
-    engine.launch()
+    function initQuantumAudio3D() {
+        if(audioStarted) return;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            osc = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+            osc.type = 'triangle'; 
+            osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            osc.start();
+            audioStarted = true;
+            startBtn.style.backgroundColor = "#00ffaa"; startBtn.style.color = "#020305";
+            startBtn.innerText = "🚀 MOTOR QUANTUM EN LÍNEA";
+        } catch(e) {}
+    }
+    startBtn.addEventListener('click', initQuantumAudio3D);
+
+    function render3DLoop() {
+        ctx.fillStyle = '#010205'; ctx.fillRect(0, 0, 760, 360);
+        let centerX = 380, centerY = 180, fov = 230, tunnelR = 155;
+
+        // Rejilla del túnel molecular
+        ctx.strokeStyle = '#05111c'; ctx.lineWidth = 1;
+        for (let z = 60; z < 550; z += 60) {
+            let scale = fov / z; ctx.beginPath(); ctx.arc(centerX, centerY, tunnelR * scale, 0, Math.PI * 2); ctx.stroke();
+        }
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+            let sMin = fov / 60, sMax = fov / 480;
+            ctx.beginPath();
+            ctx.moveTo(centerX + Math.cos(a) * tunnelR * sMin, centerY + Math.sin(a) * tunnelR * sMin);
+            ctx.lineTo(centerX + Math.cos(a) * tunnelR * sMax, centerY + Math.sin(a) * tunnelR * sMax);
+            ctx.stroke();
+        }
+
+        if (keys['a']) playerAngle -= speed;
+        if (keys['d']) playerAngle += speed;
+
+        if (audioCtx && osc && audioStarted) {
+            osc.frequency.setValueAtTime(110 + Math.sin(playerAngle) * 20, audioCtx.currentTime);
+        }
+
+        let playerX = centerX + Math.cos(playerAngle) * playerRadius * (fov / 80);
+        let playerY = centerY + Math.sin(playerAngle) * playerRadius * (fov / 80);
+
+        let alertActive = false;
+        for (let i = 0; i < obstacles.length; i++) {
+            let obs = obstacles[i]; obs.z -= obs.speed;
+            if (obs.z < 120) alertActive = true;
+            if (obs.z <= 40) {
+                obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
+                qramStability += 5; if(qramStability > 256) qramStability = 256;
+            }
+
+            let obsScale = fov / obs.z;
+            let obsX = centerX + Math.cos(obs.angle) * playerRadius * obsScale;
+            let obsY = centerY + Math.sin(obs.angle) * playerRadius * obsScale;
+            let currentSize = obs.size * obsScale;
+
+            if (obs.z > 40) {
+                ctx.fillStyle = '#ff4b4b'; ctx.fillRect(obsX - currentSize/2, obsY - currentSize/2, currentSize, currentSize);
+            }
+
+            if (70 < obs.z && obs.z < 95) {
+                let angleDiff = Math.abs(playerAngle - obs.angle);
+                if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+                if (angleDiff < 0.35) { 
+                    qramStability -= 25; if(qramStability < 0) qramStability = 0;
+                    try {
+                        const audioCtxB = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscB = audioCtxB.createOscillator(); const gainB = audioCtxB.createGain();
+                        oscB.type = 'sawtooth'; oscB.frequency.setValueAtTime(70, audioCtxB.currentTime);
+                        gainB.gain.setValueAtTime(0.2, audioCtxB.currentTime);
+                        oscB.connect(gainB); gainB.connect(audioCtxB.destination);
+                        oscB.start(); oscB.stop(audioCtxB.currentTime + 0.2);
+                    }} catch(e) {}
+                    obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
+                }
+            }
+        }
+
+        // Caza Verde Neón (🟢)
+        ctx.fillStyle = '#00ffaa'; ctx.beginPath(); ctx.arc(playerX, playerY, 10, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(playerX, playerY, 4, 0, Math.PI * 2); ctx.fill();
+
+        qramTxt.innerText = qramStability.toFixed(1) + " GB";
+        if (alertActive) {
+            statusTxt.innerText = "⚠️ ADVERTENCIA: DESFASE DE RUIDO DETECTADO"; statusTxt.style.color = "#ff4b4b";
+        } else {
+            statusTxt.innerText = "✅ COHERENCIA INTEGRAL CLEAR / BUS_OK"; statusTxt.style.color = "#00ffaa";
+        }
+        requestAnimationFrame(render3DLoop);
+    }
+    requestAnimationFrame(render3DLoop);
+</script>
+</body>
+</html>
+"""
+
+# Generar localmente el archivo html interactivo blindado
+with open("src/sim/quantum_game_3d.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("--- ARCHIVO INTERACTIVO HTML5 GENERADO CON ÉXITO ---")
+# Lanzamiento directo en el navegador web de la laptop
+webbrowser.open("src/sim/quantum_game_3d.html")
