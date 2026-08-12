@@ -1,216 +1,113 @@
 # src/sim/Q0009_1_quantum_game.py
-# Project: HUNT-QSoC "Continuum" v1.2 (Gaming Evolution)
-# Objective: Standalone 3D Quantum Engine Web App Launcher
+# Project: HUNT-QSoC "Continuum" v1.2 (ASML Cleanroom Suite)
+# Interface: Native 32-bit Window Engine (Tkinter Framework Purified)
 
-import webbrowser
-import os
+import tkinter as tk
+import random
 
-# Generamos un archivo de juego HTML5 autónomo para abrir en el navegador web
-html_content = """<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>HUNT-QSoC v1.2 - 3D Quantum Engine</title>
-    <style>
-        body {
-            background-color: #020305;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden;
-        }
-        .container {
-            max-width: 800px;
-            text-align: center;
-        }
-        .console-box {
-            background-color: #090d16;
-            border: 1px solid #1f3a60;
-            border-left: 4px solid #00ffaa;
-            padding: 12px;
-            border-radius: 5px;
-            color: #e0e6ed;
-            text-align: left;
-            margin-bottom: 15px;
-            font-size: 12px;
-            box-sizing: border-box;
-        }
-        canvas {
-            background-color: #010205;
-            border: 2px solid #1f3a60;
-            border-radius: 8px;
-            box-shadow: 0 0 35px rgba(0,255,170,0.2);
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        button {
-            background-color: #1f3a60;
-            color: #00ffaa;
-            border: 2px solid #00ffaa;
-            font-size: 15px;
-            font-weight: bold;
-            padding: 10px 25px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: monospace;
-            margin-bottom: 10px;
-            box-shadow: 0 0 15px rgba(0,255,170,0.3);
-        }
-        button:hover {
-            background-color: #00ffaa;
-            color: #020305;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>🔱 PIPELINE GAMING EN 3D REAL — TEOREMA DE HUNT ACTIVE</h2>
-        <p style="color:#8a9a9a; font-size:13px; margin-top:-10px;">🎮 CONTROLES: Teclas <b>[ A ]</b> e <b>[ D ]</b> para esquivar el ruido clásico de Nvidia (Sin Ratón)</p>
+class QuantumTkinterGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("🔱 HUNT-QSoC Continuum v1.2 - Quantum Interface")
+        self.root.geometry("820x620")
+        self.root.configure(bg="#020305")
+        self.root.resizable(False, False)
+
+        # Unificacion rigida de variables para evitar cuellos de botella
+        self.qram_score = 128.0
+        self.score = 0
+        self.player_x = 400
+        self.enemy_x = random.randint(80, 720)
+        self.enemy_y = 40
+        self.laser_active = False
+
+        self._build_centered_interface()
+        self._start_quantum_loop()
+
+    def _build_centered_interface(self):
+        # 1. CUADRO DE CONSOLA INDUSTRIAL SUPERIOR
+        console_frame = tk.Frame(self.root, bg="#090d16", bd=1, relief="solid")
+        console_frame.pack(pady=10, fill="x", padx=20)
         
-        <div class="console-box">
-            <span style="color: #00ffaa; font-weight: bold;">>>> CONTINUUM 3D ENGINE (64-BIT Q32.32) | LATENCY: 0.00 ns</span><br>
-            • QRAM Coherente : <span id="qramTxt" style="color:#00ffff; font-weight:bold;">128.0 GB</span> unificada compartida<br>
-            • Estado del Bus : <span id="statusTxt" style="color:#00ffaa;">✅ COHERENCIA INTEGRAL CLEAR / BUS_OK</span>
-        </div>
+        tk.Label(console_frame, text=">>> INTERFAZ DE NAVEGACIÓN NATAL (32-BIT TKINTER PIPELINE)", font=("Courier New", 11, "bold"), fg="#00ffaa", bg="#090d16").pack(anchor="w", padx=5)
+        
+        self.telemetry_lbl = tk.Label(console_frame, text="", font=("Courier New", 10), fg="#ffffff", bg="#090d16")
+        self.telemetry_lbl.pack(anchor="w", padx=5, py=2)
 
-        <button id="startBtn">🔊 ENERGIZAR AUDIO QUANTUM 3D</button><br>
-        <canvas id="glCanvas" width="760" height="360"></canvas>
-    </div>
+        # 2. EL LIENZO GRÁFICO DEL VIDEOJUEGO (Canvas de neón)
+        self.canvas = tk.Canvas(self.root, width=760, height=400, bg="#010205", highlightbackground="#1f3a60", highlightthickness=2)
+        self.canvas.pack(pady=5)
 
-<script>
-    const canvas = document.getElementById('glCanvas');
-    const ctx = canvas.getContext('2d');
-    const startBtn = document.getElementById('startBtn');
-    const qramTxt = document.getElementById('qramTxt');
-    const statusTxt = document.getElementById('statusTxt');
+        # 3. PANEL DE MANDOS INFERIOR (Touchpad)
+        control_frame = tk.Frame(self.root, bg="#020305")
+        control_frame.pack(pady=10)
 
-    let playerAngle = 0; 
-    let playerRadius = 125;
-    let qramStability = 128;
-    let speed = 0.05;
-    let obstacles = []; 
-    let keys = {};
-    let audioStarted = false;
+        # Mando deslizante integrado
+        self.slider = tk.Scale(control_frame, from_=50, to=710, orientation="horizontal", label="Alinear Caza Cuántico (Eje X)", font=("Courier New", 9), fg="#ffffff", bg="#090d16", troughcolor="#1f3a60", activebackground="#00ffaa", length=350, command=self._move_player)
+        self.slider.set(400)
+        self.slider.grid(row=0, column=0, padx=20)
 
-    for(let i=0; i<3; i++) {
-        obstacles.push({ angle: Math.random() * Math.PI * 2, z: 400 + i * 160, size: 22, speed: 4.8 });
-    }
+        # Boton fisico de disparo
+        fire_btn = tk.Button(control_frame, text="💥 DISPARAR RAYO ANTINODO", font=("Courier New", 12, "bold"), fg="#00ffaa", bg="#1f3a60", activebackground="#00ffaa", bd=2, relief="raised", command=self._fire_laser, width=25, height=2)
+        fire_btn.grid(row=0, column=1, padx=20)
 
-    window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
-    window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+    def _move_player(self, val):
+        self.player_x = int(val)
 
-    let audioCtx = null, osc = null, gainNode = null;
+    def _fire_laser(self):
+        self.laser_active = True
+        self.root.bell() # Pitido acustico nativo
+        
+        # Teorema de Hunt: Verificacion en el bus de 64 bits
+        if abs(self.player_x - self.enemy_x) <= 45:
+            self.qram_score += 15.0
+            if self.qram_score > 256: self.qram_score = 256.0
+            self.score += 100
+            self.enemy_y = 40
+            self.enemy_x = random.randint(80, 720)
+        else:
+            self.qram_score -= 10.0
 
-    function initQuantumAudio3D() {
-        if(audioStarted) return;
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            osc = audioCtx.createOscillator();
-            gainNode = audioCtx.createGain();
-            osc.type = 'triangle'; 
-            osc.frequency.setValueAtTime(110, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start();
-            audioStarted = true;
-            startBtn.style.backgroundColor = "#00ffaa"; startBtn.style.color = "#020305";
-            startBtn.innerText = "🚀 MOTOR QUANTUM EN LÍNEA";
-        } catch(e) {}
-    }
-    startBtn.addEventListener('click', initQuantumAudio3D);
+    def _start_quantum_loop(self):
+        self.enemy_y += 12
+        if self.enemy_y >= 380:
+            self.enemy_y = 40
+            self.enemy_x = random.randint(80, 720)
+            self.qram_score -= 15.0
 
-    function render3DLoop() {
-        ctx.fillStyle = '#010205'; ctx.fillRect(0, 0, 760, 360);
-        let centerX = 380, centerY = 180, fov = 230, tunnelR = 155;
+        if self.qram_score < 0: self.qram_score = 0.0
 
-        // Rejilla del túnel molecular
-        ctx.strokeStyle = '#05111c'; ctx.lineWidth = 1;
-        for (let z = 60; z < 550; z += 60) {
-            let scale = fov / z; ctx.beginPath(); ctx.arc(centerX, centerY, tunnelR * scale, 0, Math.PI * 2); ctx.stroke();
-        }
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-            let sMin = fov / 60, sMax = fov / 480;
-            ctx.beginPath();
-            ctx.moveTo(centerX + Math.cos(a) * tunnelR * sMin, centerY + Math.sin(a) * tunnelR * sMin);
-            ctx.lineTo(centerX + Math.cos(a) * tunnelR * sMax, centerY + Math.sin(a) * tunnelR * sMax);
-            ctx.stroke();
-        }
+        # LIMPIAR Y REDIBUJAR
+        self.canvas.delete("all")
 
-        if (keys['a']) playerAngle -= speed;
-        if (keys['d']) playerAngle += speed;
+        # Rejilla del bus
+        for i in range(0, 760, 40):
+            self.canvas.create_line(i, 0, i, 400, fill="#07111b")
+            self.canvas.create_line(0, i, 760, i, fill="#07111b")
 
-        if (audioCtx && osc && audioStarted) {
-            osc.frequency.setValueAtTime(110 + Math.sin(playerAngle) * 20, audioCtx.currentTime);
-        }
+        # Caza de Ruido de Nvidia (🟥)
+        ex, ey = self.enemy_x, self.enemy_y
+        self.canvas.create_polygon(ex, ey, ex - 18, ey - 22, ex + 18, ey - 22, fill="#ff4b4b", outline="#ffffff")
 
-        let playerX = centerX + Math.cos(playerAngle) * playerRadius * (fov / 80);
-        let playerY = centerY + Math.sin(playerAngle) * playerRadius * (fov / 80);
+        # Caza Fotonico Continuum (🟢)
+        px, py = self.player_x, 375
+        self.canvas.create_polygon(px, py - 22, px - 20, py, px + 20, py, fill="#00ffaa", outline="#ffffff")
 
-        let alertActive = false;
-        for (let i = 0; i < obstacles.length; i++) {
-            let obs = obstacles[i]; obs.z -= obs.speed;
-            if (obs.z < 120) alertActive = true;
-            if (obs.z <= 40) {
-                obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
-                qramStability += 5; if(qramStability > 256) qramStability = 256;
-            }
+        # Rayo Laser Azul Neon continuo
+        if self.laser_active:
+            self.canvas.create_line(px, py - 22, px, 0, fill="#00ffff", width=5)
+            self.laser_active = False 
 
-            let obsScale = fov / obs.z;
-            let obsX = centerX + Math.cos(obs.angle) * playerRadius * obsScale;
-            let obsY = centerY + Math.sin(obs.angle) * playerRadius * obsScale;
-            let currentSize = obs.size * obsScale;
+        # Formateo de texto seguro libre de desbordes de string
+        metric_text = "QRAM COHERENTE: " + str(round(self.qram_score, 1)) + " GB | LATENCIA: 0.00 ns | MARCADOR: " + str(self.score)
+        self.telemetry_lbl.config(text=metric_text)
 
-            if (obs.z > 40) {
-                ctx.fillStyle = '#ff4b4b'; ctx.fillRect(obsX - currentSize/2, obsY - currentSize/2, currentSize, currentSize);
-            }
+        if self.qram_score > 0:
+            self.root.after(40, self._start_quantum_loop)
+        else:
+            self.canvas.create_text(380, 200, text="DECORRECCIÓN TÉRMICA DEL CHIP\nGAME OVER", font=("Courier New", 24, "bold"), fill="#ff4b4b", justify="center")
 
-            if (70 < obs.z && obs.z < 95) {
-                let angleDiff = Math.abs(playerAngle - obs.angle);
-                if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-                if (angleDiff < 0.35) { 
-                    qramStability -= 25; if(qramStability < 0) qramStability = 0;
-                    try {
-                        const audioCtxB = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscB = audioCtxB.createOscillator(); const gainB = audioCtxB.createGain();
-                        oscB.type = 'sawtooth'; oscB.frequency.setValueAtTime(70, audioCtxB.currentTime);
-                        gainB.gain.setValueAtTime(0.2, audioCtxB.currentTime);
-                        oscB.connect(gainB); gainB.connect(audioCtxB.destination);
-                        oscB.start(); oscB.stop(audioCtxB.currentTime + 0.2);
-                    }} catch(e) {}
-                    obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
-                }
-            }
-        }
-
-        // Caza Verde Neón (🟢)
-        ctx.fillStyle = '#00ffaa'; ctx.beginPath(); ctx.arc(playerX, playerY, 10, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(playerX, playerY, 4, 0, Math.PI * 2); ctx.fill();
-
-        qramTxt.innerText = qramStability.toFixed(1) + " GB";
-        if (alertActive) {
-            statusTxt.innerText = "⚠️ ADVERTENCIA: DESFASE DE RUIDO DETECTADO"; statusTxt.style.color = "#ff4b4b";
-        } else {
-            statusTxt.innerText = "✅ COHERENCIA INTEGRAL CLEAR / BUS_OK"; statusTxt.style.color = "#00ffaa";
-        }
-        requestAnimationFrame(render3DLoop);
-    }
-    requestAnimationFrame(render3DLoop);
-</script>
-</body>
-</html>
-"""
-
-# Generar localmente el archivo html interactivo blindado
-with open("src/sim/quantum_game_3d.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-print("--- ARCHIVO INTERACTIVO HTML5 GENERADO CON ÉXITO ---")
-# Lanzamiento directo en el navegador web de la laptop
-webbrowser.open("src/sim/quantum_game_3d.html")
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = QuantumTkinterGame(root)
+    root.mainloop()
