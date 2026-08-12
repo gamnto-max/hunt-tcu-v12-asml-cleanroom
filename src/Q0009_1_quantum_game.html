@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>HUNT-QSoC v1.2 - 3D Quantum Engine</title>
+    <title>HUNT-QSoC v1.2 - Continuum Starfighter</title>
     <style>
         body {
-            background-color: #020305;
+            background-color: #010206;
             color: #ffffff;
             font-family: 'Courier New', monospace;
             display: flex;
@@ -13,187 +13,239 @@
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             overflow: hidden;
+            height: 100vh;
         }
         .container {
-            max-width: 800px;
+            width: 820px;
             text-align: center;
         }
         .console-box {
-            background-color: #090d16;
-            border: 1px solid #1f3a60;
+            background-color: #060913;
+            border: 1px solid #1a2f52;
             border-left: 4px solid #00ffaa;
-            padding: 12px;
-            border-radius: 5px;
-            color: #e0e6ed;
+            padding: 10px;
+            border-radius: 4px;
+            color: #d1d9e6;
             text-align: left;
-            margin-bottom: 15px;
-            font-size: 12px;
-            box-sizing: border-box;
-        }
-        canvas {
-            background-color: #010205;
-            border: 2px solid #1f3a60;
-            border-radius: 8px;
-            box-shadow: 0 0 35px rgba(0,255,170,0.2);
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
+            margin-bottom: 10px;
+            font-size: 11px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         button {
-            background-color: #1f3a60;
+            background-color: #122443;
             color: #00ffaa;
-            border: 2px solid #00ffaa;
-            font-size: 15px;
+            border: 1px solid #00ffaa;
+            font-size: 14px;
             font-weight: bold;
-            padding: 10px 25px;
-            border-radius: 6px;
+            padding: 10px 30px;
+            border-radius: 5px;
             cursor: pointer;
             font-family: monospace;
             margin-bottom: 10px;
-            box-shadow: 0 0 15px rgba(0,255,170,0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.2);
+            transition: all 0.2s;
         }
         button:hover {
             background-color: #00ffaa;
-            color: #020305;
+            color: #010206;
+            box-shadow: 0 0 25px rgba(0, 255, 170, 0.5);
+        }
+        canvas {
+            background-color: #010204;
+            border: 2px solid #1a2f52;
+            border-radius: 6px;
+            box-shadow: 0 0 40px rgba(0, 255, 170, 0.1);
+            display: block;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🔱 PIPELINE GAMING EN 3D REAL — TEOREMA DE HUNT ACTIVE</h2>
-        <p style="color:#8a9a9a; font-size:13px; margin-top:-10px;">🎮 CONTROLES: Teclas <b>[ A ]</b> e <b>[ D ]</b> para esquivar el ruido clásico de Nvidia (Sin Ratón)</p>
+        <h2 style="margin: 0 0 5px 0; color: #00ffaa; text-shadow: 0 0 10px rgba(0,255,170,0.3);">🔱 CONTINUUM: PHASE WALKER ADVANCED v1.2</h2>
+        <p style="color:#7a8a9e; font-size:12px; margin: 0 0 10px 0;">🎮 MANDOS LOGÍSTICOS: Teclas <b>[ A ]</b> / <b>[ D ]</b> para Volar | <b>[ ESPACIO ]</b> para Disparar Rayos de Neón</p>
         
         <div class="console-box">
-            <span style="color: #00ffaa; font-weight: bold;">>>> CONTINUUM 3D ENGINE (64-BIT Q32.32) | LATENCY: 0.00 ns</span><br>
-            • QRAM Coherente : <span id="qramTxt" style="color:#00ffff; font-weight:bold;">128.0 GB</span> unificada compartida<br>
-            • Estado del Bus : <span id="statusTxt" style="color:#00ffaa;">✅ COHERENCIA INTEGRAL CLEAR / BUS_OK</span>
+            <span style="color: #00ffaa; font-weight: bold;">>>> MATRIZ GRÁFICA QGPU SUPREMA ACTIVA (PRE-SILICIO)</span><br>
+            • Enlace QRAM Coherente: <span id="qramTxt" style="color:#00ffff; font-weight:bold;">128.0 GB</span> unificada | Latencia de Bus: <span style="color:#00ffaa; font-weight:bold;">0.00 ns Combinacional</span><br>
+            • Estado del Circuito : <span id="statusTxt" style="color:#00ffaa;">✅ AUTOPISTA DE SILICIO-28 CLEAR / BUS_OK</span>
         </div>
 
-        <button id="startBtn">🔊 ENERGIZAR AUDIO QUANTUM 3D</button><br>
-        <canvas id="glCanvas" width="760" height="360"></canvas>
+        <button id="startBtn">🔊 ENERGIZAR INTERFAZ CINEMÁTICA</button><br>
+        <canvas id="gameCanvas" width="800" height="420"></canvas>
     </div>
 
 <script>
-    const canvas = document.getElementById('glCanvas');
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const startBtn = document.getElementById('startBtn');
     const qramTxt = document.getElementById('qramTxt');
     const statusTxt = document.getElementById('statusTxt');
 
-    let playerAngle = 0; 
-    let playerRadius = 125;
+    // SISTEMA DE CONTROL DE FLUEJO
+    let playerX = 400;
+    let playerSpeed = 8;
     let qramStability = 128;
-    let speed = 0.05;
-    let obstacles = []; 
-    let keys = {};
+    let score = 0;
+    let frames = 0;
     let audioStarted = false;
 
-    for(let i=0; i<3; i++) {
-        obstacles.push({ angle: Math.random() * Math.PI * 2, z: 400 + i * 160, size: 22, speed: 4.8 });
+    let stars = [];
+    let enemies = [];
+    let lasers = [];
+    let explosions = [];
+    let keys = {};
+
+    // Inicializar campo de estrellas 3D continuo (Desplazamiento estelar)
+    for(let i=0; i<60; i++) {
+        stars.push({ x: Math.random() * 800, y: Math.random() * 420, size: Math.random() * 2, speed: Math.random() * 3 + 1 });
     }
 
+    // Inicializar cazas de asalto de ruido Nvidia (Diseño de naves realistas)
+    function spawnEnemy() {
+        return {
+            x: Math.random() * 700 + 50,
+            y: Math.random() * -150 - 30,
+            speed: Math.random() * 2 + 2.5,
+            width: 32,
+            height: 28,
+            pulse: 0
+        };
+    }
+    for(let i=0; i<3; i++) enemies.push(spawnEnemy());
+
+    // CAPTURA DE TECLADO NATIVA SIN INTERRUPCIONES
     window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
     window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-    let audioCtx = null, osc = null, gainNode = null;
+    // SINTETIZADOR DE AUDIO AVANZADO DE BAJA FRECUENCIA
+    let audioCtx = null, mainOsc = null, mainGain = null;
 
-    function initQuantumAudio3D() {
+    function startQuantumAudio() {
         if(audioStarted) return;
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            osc = audioCtx.createOscillator();
-            gainNode = audioCtx.createGain();
-            osc.type = 'triangle'; 
-            osc.frequency.setValueAtTime(110, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start();
+            mainOsc = audioCtx.createOscillator();
+            mainGain = audioCtx.createGain();
+            
+            mainOsc.type = 'sine';
+            mainOsc.frequency.setValueAtTime(80, audioCtx.currentTime); // Zumbido grave de reactor espacial
+            mainGain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            
+            mainOsc.connect(mainGain); mainGain.connect(audioCtx.destination);
+            mainOsc.start();
             audioStarted = true;
-            startBtn.style.backgroundColor = "#00ffaa"; startBtn.style.color = "#020305";
-            startBtn.innerText = "🚀 MOTOR QUANTUM EN LÍNEA";
+            startBtn.style.backgroundColor = "#00ffaa"; startBtn.style.color = "#010206";
+            startBtn.innerText = "🚀 FLUJO DE AUDIO CINEMÁTICO INTEGRADO";
         } catch(e) {}
     }
-    startBtn.addEventListener('click', initQuantumAudio3D);
+    startBtn.addEventListener('click', startQuantumAudio);
 
-    function render3DLoop() {
-        ctx.fillStyle = '#010205'; ctx.fillRect(0, 0, 760, 360);
-        let centerX = 380, centerY = 180, fov = 230, tunnelR = 155;
-
-        // Rejilla del túnel molecular
-        ctx.strokeStyle = '#05111c'; ctx.lineWidth = 1;
-        for (let z = 60; z < 550; z += 60) {
-            let scale = fov / z; ctx.beginPath(); ctx.arc(centerX, centerY, tunnelR * scale, 0, Math.PI * 2); ctx.stroke();
-        }
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-            let sMin = fov / 60, sMax = fov / 480;
-            ctx.beginPath();
-            ctx.moveTo(centerX + Math.cos(a) * tunnelR * sMin, centerY + Math.sin(a) * tunnelR * sMin);
-            ctx.lineTo(centerX + Math.cos(a) * tunnelR * sMax, centerY + Math.sin(a) * tunnelR * sMax);
-            ctx.stroke();
-        }
-
-        if (keys['a']) playerAngle -= speed;
-        if (keys['d']) playerAngle += speed;
-
-        if (audioCtx && osc && audioStarted) {
-            osc.frequency.setValueAtTime(110 + Math.sin(playerAngle) * 20, audioCtx.currentTime);
-        }
-
-        let playerX = centerX + Math.cos(playerAngle) * playerRadius * (fov / 80);
-        let playerY = centerY + Math.sin(playerAngle) * playerRadius * (fov / 80);
-
-        let alertActive = false;
-        for (let i = 0; i < obstacles.length; i++) {
-            let obs = obstacles[i]; obs.z -= obs.speed;
-            if (obs.z < 120) alertActive = true;
-            if (obs.z <= 40) {
-                obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
-                qramStability += 5; if(qramStability > 256) qramStability = 256;
-            }
-
-            let obsScale = fov / obs.z;
-            let obsX = centerX + Math.cos(obs.angle) * playerRadius * obsScale;
-            let obsY = centerY + Math.sin(obs.angle) * playerRadius * obsScale;
-            let currentSize = obs.size * obsScale;
-
-            if (obs.z > 40) {
-                ctx.fillStyle = '#ff4b4b'; ctx.fillRect(obsX - currentSize/2, obsY - currentSize/2, currentSize, currentSize);
-            }
-
-            if (70 < obs.z && obs.z < 95) {
-                let angleDiff = Math.abs(playerAngle - obs.angle);
-                if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-                if (angleDiff < 0.35) { 
-                    qramStability -= 25; if(qramStability < 0) qramStability = 0;
-                    try {
-                        const audioCtxB = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscB = audioCtxB.createOscillator(); const gainB = audioCtxB.createGain();
-                        oscB.type = 'sawtooth'; oscB.frequency.setValueAtTime(70, audioCtxB.currentTime);
-                        gainB.gain.setValueAtTime(0.2, audioCtxB.currentTime);
-                        oscB.connect(gainB); gainB.connect(audioCtxB.destination);
-                        oscB.start(); oscB.stop(audioCtxB.currentTime + 0.2);
-                    } catch(e) {}
-                    obs.z = 520; obs.angle = Math.random() * Math.PI * 2;
-                }
-            }
-        }
-
-        // Caza Verde Neón (🟢)
-        ctx.fillStyle = '#00ffaa'; ctx.beginPath(); ctx.arc(playerX, playerY, 10, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(playerX, playerY, 4, 0, Math.PI * 2); ctx.fill();
-
-        qramTxt.innerText = qramStability.toFixed(1) + " GB";
-        if (alertActive) {
-            statusTxt.innerText = "⚠️ ADVERTENCIA: DESFASE DE RUIDO DETECTADO"; statusTxt.style.color = "#ff4b4b";
-        } else {
-            statusTxt.innerText = "✅ COHERENCIA INTEGRAL CLEAR / BUS_OK"; statusTxt.style.color = "#00ffaa";
-        }
-        requestAnimationFrame(render3DLoop);
+    function triggerSoundEffect(freqStart, freqEnd, type, duration, volume) {
+        if(!audioStarted) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + duration);
+            
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
     }
-    requestAnimationFrame(render3DLoop);
-</script>
-</body>
-</html>
+
+    // BUCLE DE GRÁFICOS CONTINUO A 60 FPS FIJOS POR GPU
+    function coreGameLoop() {
+        frames++;
+        
+        // Limpieza con ligero rastro para Motion Blur cinemático de los rayos de neón
+        ctx.fillStyle = 'rgba(1, 2, 6, 0.2)';
+        ctx.fillRect(0, 0, 800, 420);
+
+        // 1. DESPLAZAMIENTO ESTELAR EN TIEMPO REAL
+        ctx.fillStyle = '#ffffff';
+        for(let i=0; i<stars.length; i++) {
+            stars[i].y += stars[i].speed;
+            if(stars[i].y > 420) { stars[i].y = 0; stars[i].x = Math.random() * 800; }
+            ctx.fillRect(stars[i].x, stars[i].y, stars[i].size, stars[i].size);
+        }
+
+        // 2. CONTROL COMBINACIONAL DE TU NAVE (Teclas A / D)
+        if (keys['a'] || keys['arrowleft']) playerX -= playerSpeed;
+        if (keys['d'] || keys['arrowright']) playerX += playerSpeed;
+        if (playerX < 40) playerX = 40;
+        if (playerX > 760) playerX = 760;
+
+        // Modulación armónica del zumbido según tu vuelo
+        if(audioCtx && mainOsc && audioStarted) {
+            mainOsc.frequency.setValueAtTime(80 + (playerX - 400) * 0.05, audioCtx.currentTime);
+        }
+
+        // 3. ENERGIZAR DISPARO DE RAYOS LÁSER DE NEÓN (Tecla Espacio)
+        if (keys[' ']) {
+            if(frames % 10 === 0) { // Cadencia del cañón del Continuum
+                lasers.push({ x: playerX, y: 365 });
+                triggerSoundEffect(900, 300, 'sine', 0.12, 0.06); // Sonido disparo láser limpio
+            }
+        }
+
+        // 4. ACTUALIZAR Y DIBUJAR RAYOS DE NEÓN AZUL (Trazado con resplandor)
+        for (let i = lasers.length - 1; i >= 0; i--) {
+            lasers[i].y -= 11;
+            
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#00ffff'; ctx.shadowBlur = 12; // Resplandor neón físico
+            ctx.beginPath();
+            ctx.moveTo(lasers[i].x, lasers[i].y);
+            ctx.lineTo(lasers[i].x, lasers[i].y - 20);
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Resetear resplandor
+
+            if (lasers[i].y < 0) lasers.splice(i, 1);
+        }
+
+        // 5. MOVIMIENTO Y DISEÑO REALISTA DE LAS NAVES DE NVIDIA (🟥)
+        let dangerAlert = false;
+        for (let i = 0; i < enemies.length; i++) {
+            let e = enemies[i];
+            e.y += e.speed;
+            e.pulse += 0.1;
+
+            if(e.y > 260) dangerAlert = true;
+
+            // Si se escapa, golpea el sustrato y desestabiliza la memoria unificada
+            if (e.y > 430) {
+                enemies[i] = spawnEnemy();
+                qramStability -= 15;
+                triggerSoundEffect(200, 80, 'triangle', 0.15, 0.1); // Impacto sordo en el bus
+                if(qramStability < 0) qramStability = 0;
+            }
+
+            // DIBUJAR NAVE DE RUIDO ENEMIGA (Estructura de caza militar roja)
+            ctx.fillStyle = '#ff4b4b';
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(e.x, e.y); // Punta delantera
+            ctx.lineTo(e.x - e.width/2, e.y - e.height); // Ala izquierda
+            ctx.lineTo(e.x - e.width/4, e.y - e.height + 6);
+            ctx.lineTo(e.x + e.width/4, e.y - e.height + 6);
+            ctx.lineTo(e.x + e.width/2, e.y - e.height); // Ala derecha
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            
+            // Núcleo energético parpadeante de los transistores caóticos
+            ctx.fillStyle = Math.sin(e.pulse) > 0 ? '#ffffff' : '#ff9999';
+            ctx.fillRect(e.x - 3, e.y - 14, 6, 6);
+
+            // DETECTOR DE INTERCEPCIÓN GEOMÉTRICA (Teorema de Hunt en Acción)
+            for (let j = lasers.length - 1; j >= 0; j--) {
+                let l = lasers[j];
+                if (Math.abs(l.x - e.x) < e.width/2 + 2 && l.y < e.y && l.y > e.y - e.height) {
+Usa el código con precaución.
